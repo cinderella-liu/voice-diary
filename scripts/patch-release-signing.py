@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Patch app/build.gradle to add release signing config."""
+"""Replace entire signingConfigs block to add release signing config."""
 import re
 import sys
 
@@ -8,25 +8,34 @@ build_gradle = sys.argv[1]
 with open(build_gradle, 'r') as f:
     content = f.read()
 
-# Release signing config block
-release_config = r'''    }  // end debug signingConfig
+# Replace the entire signingConfigs block (from 'signingConfigs {' to its closing '}')
+old_block = r'''    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
+    }'''
+
+new_block = r'''    signingConfigs {
+        debug {
+            storeFile file('debug.keystore')
+            storePassword 'android'
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+        }
         release {
             storeFile file(RELEASE_KEYSTORE)
             storePassword RELEASE_STORE_PASSWORD
             keyAlias RELEASE_KEY_ALIAS
             keyPassword RELEASE_KEY_PASSWORD
-        }'''
+        }
+    }'''
 
-# Insert the release signing config AFTER the debug block closes
-content = re.sub(
-    r'^(\s+keyPassword \'android\'\s*\n\s*\})',
-    r'\1' + '\n' + release_config,
-    content,
-    count=1,
-    flags=re.MULTILINE
-)
+content = content.replace(old_block, new_block)
 
-# Change release build type to use release signing instead of debug
+# Change release build type to use release signing config
 content = content.replace(
     'signingConfig signingConfigs.debug',
     'signingConfig signingConfigs.release'
@@ -35,13 +44,12 @@ content = content.replace(
 with open(build_gradle, 'w') as f:
     f.write(content)
 
-# Verify the structure is valid
-if 'debug {' in content and 'release {' in content:
-    # Check the release block is NOT nested inside debug
-    debug_end = content.find("}  // end debug signingConfig")
-    if debug_end > 0:
-        print("✓ Release signing config patched successfully (outside debug block)")
+# Verify
+if 'signingConfigs {\n        debug' in content and 'signingConfigs {\n        debug' in content:
+    # Count release signing configs inside signingConfigs
+    if 'release {' in content:
+        print("✓ Release signing config patched successfully (block replacement)")
     else:
-        print("⚠ Warning: release block may still be nested inside debug")
+        print("✗ Release block not found")
 else:
-    print("✗ Missing signing configs in output")
+    print("✗ signingConfigs block not found")
