@@ -29,16 +29,35 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Generate keystore
+        run: |
+          keytool -genkey -v \
+            -keystore release.keystore \
+            -alias voice-diary \
+            -keyalg RSA -keysize 2048 \
+            -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Voice Diary, OU=Dev, O=Voice Diary, L=Beijing, S=Beijing, C=CN"
+
       - name: Expo prebuild (Android)
         run: npx expo prebuild -p android --clean
 
-      - name: Build debug APK
+      - name: Configure release signing
+        run: |
+          cat >> android/gradle.properties << EOF
+          RELEASE_KEYSTORE=../release.keystore
+          RELEASE_STORE_PASSWORD=android
+          RELEASE_KEY_ALIAS=voice-diary
+          RELEASE_KEY_PASSWORD=android
+          EOF
+
+      - name: Build release APK
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: voice-diary-apk
-          path: android/app/build/outputs/apk/debug/*.apk
+          path: android/app/build/outputs/apk/release/*.apk
