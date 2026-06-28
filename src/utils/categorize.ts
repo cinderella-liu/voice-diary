@@ -18,6 +18,17 @@ const exerciseKeywords = [
   '跑完了', '跑了', '游了', '练了',
 ];
 
+// 生活关键词
+const lifeKeywords = [
+  '吃', '喝', '美食', '做饭', '外卖', '餐厅', '饭店',
+  '购物', '买', '逛街', '淘宝', '京东', '下单',
+  '旅行', '旅游', '出去玩', '逛', '公园', '电影',
+  '看书', '读书', '追剧', '动漫', '游戏', '打游戏',
+  '咖啡', '喝茶', '朋友', '聚餐', '聚会', '约会',
+  '日常', '在家', '休息', '睡觉', '起床', '打扫',
+  '理髮', '剪头', '买菜', '超市', '散步去了',
+];
+
 /**
  * 根据文本自动归类
  */
@@ -41,6 +52,17 @@ export function categorize(text: string): CategorizeResult {
       return {
         type: 'exercise',
         title: extractExerciseTitle(t),
+        content: t,
+      };
+    }
+  }
+
+  // 检查生活关键词
+  for (const kw of lifeKeywords) {
+    if (t.includes(kw)) {
+      return {
+        type: 'life',
+        title: extractLifeTitle(t),
         content: t,
       };
     }
@@ -78,6 +100,16 @@ function extractExerciseTitle(text: string): string {
   return '运动记录';
 }
 
+function extractLifeTitle(text: string): string {
+  if (text.includes('吃') || text.includes('美食') || text.includes('做饭') || text.includes('外卖') || text.includes('餐厅') || text.includes('饭店')) return '美食';
+  if (text.includes('购物') || text.includes('买') || text.includes('逛街') || text.includes('淘宝') || text.includes('京东') || text.includes('下单')) return '购物';
+  if (text.includes('旅行') || text.includes('旅游') || text.includes('出去玩') || text.includes('公园') || text.includes('电影')) return '娱乐';
+  if (text.includes('看书') || text.includes('读书') || text.includes('追剧') || text.includes('动漫') || text.includes('游戏') || text.includes('打游戏')) return '休闲';
+  if (text.includes('咖啡') || text.includes('喝茶') || text.includes('聚餐') || text.includes('聚会') || text.includes('约会')) return '社交';
+  if (text.includes('买菜') || text.includes('超市') || text.includes('打扫') || text.includes('理髮') || text.includes('起床')) return '日常';
+  return '日常';
+}
+
 /**
  * 手动指定归类
  */
@@ -86,5 +118,6 @@ export function getDefaultTitle(type: RecordType): string {
     case 'checkin': return '考勤记录';
     case 'exercise': return '运动记录';
     case 'work': return '工作任务';
+    case 'life': return '日常';
   }
 }

@@ -20,6 +20,7 @@ export const typeLabels: Record<string, string> = {
   checkin: '考勤',
   exercise: '运动',
   work: '工作计划',
+  life: '生活',
 };
 
 // 记录类型 → 图标
@@ -27,6 +28,7 @@ export const typeIcons: Record<string, string> = {
   checkin: 'clock-outline',
   exercise: 'run',
   work: 'clipboard-text-outline',
+  life: 'heart-outline',
 };
 
 // 工作状态 → 中文标签

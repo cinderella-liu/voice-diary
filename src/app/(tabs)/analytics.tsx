@@ -172,6 +172,25 @@ export default function AnalyticsScreen() {
     ];
   }, [filteredRecords]);
 
+  // --- 生活类别分布柱状图 ---
+  const lifeChart = useMemo(() => {
+    const lives = filteredRecords.filter((r) => r.type === 'life');
+
+    if (lives.length === 0) return null;
+
+    const catCount: Record<string, number> = {};
+    lives.forEach((r) => {
+      const cat = (r.metadata as any).category || '其他';
+      catCount[cat] = (catCount[cat] || 0) + 1;
+    });
+
+    const sorted = Object.entries(catCount).sort((a, b) => b[1] - a[1]);
+    return {
+      labels: sorted.map(([c]) => c),
+      datasets: [{ data: sorted.map(([, v]) => v) }],
+    };
+  }, [filteredRecords]);
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
@@ -250,6 +269,26 @@ export default function AnalyticsScreen() {
             />
           ) : (
             <Text style={styles.noData}>暂无工作数据</Text>
+          )}
+        </View>
+
+        {/* 生活类别分布 */}
+        <View style={styles.chartCard}>
+          <Text style={styles.chartTitle}>❤️ 生活类别分布</Text>
+          {lifeChart ? (
+            <BarChart
+              data={lifeChart}
+              width={screenWidth - 48}
+              height={180}
+              chartConfig={chartConfig}
+              style={styles.chart}
+              fromZero
+              showValuesOnTopOfBars
+              yAxisLabel=""
+              yAxisSuffix=""
+            />
+          ) : (
+            <Text style={styles.noData}>暂无生活记录</Text>
           )}
         </View>
 

@@ -55,6 +55,14 @@ export function useRecords() {
     const checkins = monthRecords.filter(r => r.type === 'checkin');
     const exercises = monthRecords.filter(r => r.type === 'exercise');
     const works = monthRecords.filter(r => r.type === 'work');
+    const lives = monthRecords.filter(r => r.type === 'life');
+
+    // 统计生活类别分布
+    const lifeCategories: Record<string, number> = {};
+    lives.forEach(r => {
+      const cat = (r.metadata as any).category || '其他';
+      lifeCategories[cat] = (lifeCategories[cat] || 0) + 1;
+    });
 
     return {
       checkin: {
@@ -73,6 +81,11 @@ export function useRecords() {
         pending: works.filter(r => (r.metadata as any).status !== 'done').length,
         completed: works.filter(r => (r.metadata as any).status === 'done').length,
         records: works,
+      },
+      life: {
+        totalRecords: lives.length,
+        categories: lifeCategories,
+        records: lives,
       },
     };
   }, [records]);

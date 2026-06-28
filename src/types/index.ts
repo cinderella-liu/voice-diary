@@ -1,5 +1,5 @@
 // 记录类型
-export type RecordType = 'checkin' | 'exercise' | 'work';
+export type RecordType = 'checkin' | 'exercise' | 'work' | 'life';
 
 // 工作状态
 export type WorkStatus = 'todo' | 'doing' | 'done';
@@ -20,6 +20,11 @@ export interface ExerciseMeta {
 // 工作计划元数据
 export interface WorkMeta {
   status: WorkStatus;
+}
+
+// 生活记录元数据
+export interface LifeMeta {
+  category?: string;  // 如：美食、购物、旅行、日常
 }
 
 // 记录
@@ -46,6 +51,7 @@ export interface MonthlyStats {
   checkin: { avgDuration: number; attendanceDays: number; records: DiaryRecord[] };
   exercise: { totalSessions: number; totalMinutes: number; records: DiaryRecord[] };
   work: { pending: number; completed: number; records: DiaryRecord[] };
+  life: { totalRecords: number; categories: Record<string, number>; records: DiaryRecord[] };
 }
 
 // 分类结果

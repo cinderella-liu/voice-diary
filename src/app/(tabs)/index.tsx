@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   View, Text, StyleSheet, SafeAreaView, ScrollView,
-  Alert, TouchableOpacity, Modal, Platform,
+  Alert, TouchableOpacity, Modal, Platform, TextInput,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import VoiceButton from '../../components/VoiceButton';
@@ -13,12 +13,13 @@ import { useCategorize } from '../../hooks/useCategorize';
 import { useRecords } from '../../hooks/useRecords';
 import { generateId, addRecord } from '../../utils/storage';
 import { DiaryRecord, RecordType } from '../../types';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 
 const typeOptions: { type: RecordType; label: string; icon: string }[] = [
   { type: 'checkin', label: '考勤打卡', icon: 'clock-outline' },
   { type: 'exercise', label: '运动记录', icon: 'run' },
   { type: 'work', label: '工作计划', icon: 'clipboard-text-outline' },
+  { type: 'life', label: '生活记录', icon: 'heart-outline' },
 ];
 
 export default function HomeScreen() {
@@ -26,6 +27,7 @@ export default function HomeScreen() {
   const voice = useVoice();
   const cat = useCategorize();
   const { records, refresh } = useRecords();
+  const [manualText, setManualText] = React.useState('');
 
   const recentRecords = records.slice(0, 5);
 
@@ -56,6 +58,9 @@ export default function HomeScreen() {
         break;
       case 'work':
         metadata = { status: 'todo' };
+        break;
+      case 'life':
+        metadata = { category: cat.result.title };
         break;
     }
 
@@ -88,28 +93,63 @@ export default function HomeScreen() {
     }
   };
 
+  const handleManualSubmit = () => {
+    const text = manualText.trim();
+    if (!text) return;
+    cat.categorizeText(text);
+    setManualText('');
+  };
+
   return (
     <SafeAreaView style={[styles.container, { paddingTop: insets.top }]}>
       <View style={styles.header}>
         <Text style={styles.title}>语音记事本</Text>
-        <Text style={styles.subtitle}>点击麦克风开始语音记录</Text>
+        <Text style={styles.subtitle}>
+          {voice.hasNativeVoice ? '点击麦克风开始语音记录' : '输入文字开始记录'}
+        </Text>
       </View>
 
       <ScrollView style={styles.body} showsVerticalScrollIndicator={false}>
         {/* 语音按钮区域 */}
         <View style={styles.voiceSection}>
-          <VoiceButton
-            isListening={voice.status === 'listening'}
-            onPress={handleMicPress}
-          />
-          {voice.status === 'listening' && (
-            <Text style={styles.listeningHint}>正在聆听...</Text>
-          )}
-          {voice.status === 'processing' && (
-            <Text style={styles.processingHint}>识别中...</Text>
-          )}
-          {voice.error && (
-            <Text style={styles.errorText}>{voice.error}</Text>
+          {voice.hasNativeVoice ? (
+            <>
+              <VoiceButton
+                isListening={voice.status === 'listening'}
+                onPress={handleMicPress}
+              />
+              {voice.status === 'listening' && (
+                <Text style={styles.listeningHint}>正在聆听...</Text>
+              )}
+              {voice.status === 'processing' && (
+                <Text style={styles.processingHint}>识别中...</Text>
+              )}
+              {voice.error && (
+                <Text style={styles.errorText}>{voice.error}</Text>
+              )}
+            </>
+          ) : (
+            <>
+              <View style={styles.manualInputRow}>
+                <TextInput
+                  style={styles.manualInput}
+                  placeholder="输入今天发生了什么…"
+                  placeholderTextColor={colors.textSecondary}
+                  value={manualText}
+                  onChangeText={setManualText}
+                  multiline
+                  numberOfLines={3}
+                  textAlignVertical="top"
+                />
+              </View>
+              <TouchableOpacity
+                style={[styles.submitBtn, !manualText.trim() && styles.submitBtnDisabled]}
+                onPress={handleManualSubmit}
+                disabled={!manualText.trim()}
+              >
+                <Text style={styles.submitBtnText}>记录</Text>
+              </TouchableOpacity>
+            </>
           )}
         </View>
 
@@ -226,6 +266,38 @@ const styles = StyleSheet.create({
     marginTop: 12,
     fontSize: 13,
     color: colors.danger,
+    fontFamily: 'ZCOOL-KuaiLe',
+  },
+  manualInputRow: {
+    width: '100%',
+    paddingHorizontal: 20,
+    marginBottom: 12,
+  },
+  manualInput: {
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+    fontSize: 15,
+    color: colors.textPrimary,
+    fontFamily: 'ZCOOL-KuaiLe',
+    minHeight: 80,
+    lineHeight: 22,
+  },
+  submitBtn: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 24,
+    alignSelf: 'center',
+  },
+  submitBtnDisabled: {
+    opacity: 0.4,
+  },
+  submitBtnText: {
+    fontSize: 15,
+    color: colors.white,
     fontFamily: 'ZCOOL-KuaiLe',
   },
   // Modal

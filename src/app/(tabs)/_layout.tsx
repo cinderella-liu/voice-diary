@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { colors } from '../../utils/colors';
 
 function TabIcon({ name, focused }: { name: string; focused: boolean }) {
@@ -60,6 +60,13 @@ export default function TabsLayout() {
         options={{
           tabBarLabel: '工作',
           tabBarIcon: ({ focused }) => <TabIcon name="clipboard-text-outline" focused={focused} />,
+        }}
+      />
+      <Tabs.Screen
+        name="life"
+        options={{
+          tabBarLabel: '生活',
+          tabBarIcon: ({ focused }) => <TabIcon name="heart-outline" focused={focused} />,
         }}
       />
       <Tabs.Screen

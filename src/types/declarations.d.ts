@@ -26,18 +26,8 @@ declare module 'react-native-voice' {
   export default Voice;
 }
 
-declare module 'react-native-vector-icons/MaterialCommunityIcons' {
-  import { Component } from 'react';
-  import { TextProps } from 'react-native';
-
-  interface IconProps extends TextProps {
-    name: string;
-    size?: number;
-    color?: string;
-  }
-
-  export default class Icon extends Component<IconProps> {}
-}
+// @expo/vector-icons has built-in types — no manual declarations needed
+// Old react-native-vector-icons declaration removed
 
 declare module 'react-native-chart-kit' {
   import { Component } from 'react';

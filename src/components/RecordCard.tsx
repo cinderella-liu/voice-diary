@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { MaterialCommunityIcons as Icon } from '@expo/vector-icons';
 import { DiaryRecord } from '../types';
 import { colors, typeLabels, typeIcons, workStatusLabels } from '../utils/colors';
 import { formatTime, formatDate, minutesToStr, getWeekday } from '../utils/dateUtils';
