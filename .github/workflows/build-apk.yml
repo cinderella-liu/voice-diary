@@ -44,12 +44,15 @@ jobs:
 
       - name: Configure release signing
         run: |
-          cat >> android/gradle.properties << EOF
+          # Add release signing properties to gradle.properties
+          cat >> android/gradle.properties << 'EOF'
           RELEASE_KEYSTORE=../release.keystore
           RELEASE_STORE_PASSWORD=android
           RELEASE_KEY_ALIAS=voice-diary
           RELEASE_KEY_PASSWORD=android
           EOF
+          # Patch app/build.gradle to add release signing config
+          python3 scripts/patch-release-signing.py android/app/build.gradle
 
       - name: Build release APK
         run: |
