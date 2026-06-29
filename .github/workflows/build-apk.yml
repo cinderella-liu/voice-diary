@@ -44,21 +44,17 @@ jobs:
 
       - name: Configure release signing
         run: |
-          # Add release signing properties to gradle.properties
           cat >> android/gradle.properties << 'EOF'
           RELEASE_KEYSTORE=../release.keystore
           RELEASE_STORE_PASSWORD=android
           RELEASE_KEY_ALIAS=voice-diary
           RELEASE_KEY_PASSWORD=android
           EOF
-          # Patch app/build.gradle to add release signing config
           python3 scripts/patch-release-signing.py android/app/build.gradle
 
       - name: Build release APK
         run: |
-          cd android
-          set -o pipefail
-          ./gradlew assembleRelease --stacktrace 2>&1 | tee ../build.log
+          npx expo run:android --variant release --no-build-cache 2>&1 | tee build.log
 
       - name: Upload build log (on failure)
         if: failure()
