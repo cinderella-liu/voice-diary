@@ -54,7 +54,14 @@ jobs:
 
       - name: Build release APK
         run: |
+          set -o pipefail
           npx expo run:android --variant release --no-build-cache 2>&1 | tee build.log
+
+      - name: List APK files
+        run: |
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+          ls -la android/app/build/outputs/apk/ 2>/dev/null || echo "No apk output dir"
+          ls -la android/app/build/outputs/ 2>/dev/null || true
 
       - name: Upload build log (on failure)
         if: failure()
@@ -67,4 +74,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: voice-diary-apk
-          path: android/app/build/outputs/apk/release/*.apk
+          path: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/debug/*.apk
